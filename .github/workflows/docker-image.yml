@@ -12,6 +12,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0   # ✅ Important: Needed to fetch all tags
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -40,6 +42,8 @@ jobs:
         docker push docker.io/${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }}
 
     - name: Create Git tag
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Required for tag push
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
