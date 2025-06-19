@@ -41,13 +41,11 @@ jobs:
         shell: bash
         run: |
           echo "Building Docker image with tag: ${{ env.NEXT_TAG }}"
-          IMAGE_NAME="${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }}"
-          docker buildx build --load -t "$IMAGE_NAME" .
+          docker buildx build --load -t '${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }}' .
 
       - name: Push Docker image
         run: |
-          IMAGE_NAME="${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }}"
-          docker push "$IMAGE_NAME"
+          docker push '${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }}'
 
       - name: Tag and push Git tag
         run: |
