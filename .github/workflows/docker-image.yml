@@ -24,7 +24,8 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Get next image tag from git
+      - name: Generate and export Docker image tag
+        id: get-tag
         run: |
           LAST_TAG=$(git tag | grep '^v[0-9]\+$' | sed 's/v//' | sort -n | tail -n 1)
           if [ -z "$LAST_TAG" ]; then
@@ -32,24 +33,24 @@ jobs:
           else
             NEXT_TAG=$((LAST_TAG + 1))
           fi
-          echo "NEXT_TAG=v$NEXT_TAG" >> $GITHUB_ENV
+          echo "NEXT_TAG=v$NEXT_TAG"
+          echo "next_tag=v$NEXT_TAG" >> $GITHUB_OUTPUT
 
       - name: Show build context
         run: ls -l
 
       - name: Build Docker image with Buildx
-        shell: bash
         run: |
-          echo "Building Docker image with tag: ${{ env.NEXT_TAG }}"
-          docker buildx build --load -t ${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }} .
+          echo "Building Docker image with tag: ${{ steps.get-tag.outputs.next_tag }}"
+          docker buildx build --load -t ${{ secrets.DOCKER_USERNAME }}/python:${{ steps.get-tag.outputs.next_tag }} .
 
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/python:${{ steps.get-tag.outputs.next_tag }}
 
       - name: Tag and push Git tag
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git tag ${{ env.NEXT_TAG }}
-          git push origin ${{ env.NEXT_TAG }}
+          git tag ${{ steps.get-tag.outputs.next_tag }}
+          git push origin ${{ steps.get-tag.outputs.next_tag }}
