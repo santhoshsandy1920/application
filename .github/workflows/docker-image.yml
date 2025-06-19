@@ -33,13 +33,12 @@ jobs:
 
     - name: Build Docker image (force classic Docker CLI)
       run: |
-        echo "Using docker at: $(command -v docker)"
         echo "Building image with tag: ${{ env.NEXT_TAG }}"
-        /usr/bin/docker build -t ${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }} .
+        DOCKER_BUILDKIT=0 docker build -t ${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }} .
 
     - name: Push Docker image
       run: |
-        /usr/bin/docker push ${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }}
+        docker push ${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }}
 
     - name: Tag and push Git tag
       run: |
