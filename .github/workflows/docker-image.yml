@@ -22,7 +22,6 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Get next image tag from git
-      id: get_tag
       run: |
         LAST_TAG=$(git tag | grep '^v[0-9]\+$' | sed 's/v//' | sort -n | tail -n 1)
         if [ -z "$LAST_TAG" ]; then
@@ -32,14 +31,15 @@ jobs:
         fi
         echo "NEXT_TAG=v$NEXT_TAG" >> $GITHUB_ENV
 
-    - name: Build Docker image
+    - name: Build Docker image (force classic Docker CLI)
       run: |
-        echo "Building docker image with tag: ${{ env.NEXT_TAG }}"
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }} .
+        echo "Using docker at: $(command -v docker)"
+        echo "Building image with tag: ${{ env.NEXT_TAG }}"
+        /usr/bin/docker build -t ${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }} .
 
     - name: Push Docker image
       run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }}
+        /usr/bin/docker push ${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }}
 
     - name: Tag and push Git tag
       run: |
