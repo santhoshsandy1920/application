@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Needed to access all git tags
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -22,13 +24,34 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Determine next image tag
+        id: tag
+        run: |
+          LAST_TAG=$(git tag | grep '^v[0-9]\+$' | sed 's/v//' | sort -n | tail -n 1)
+          if [ -z "$LAST_TAG" ]; then
+            NEXT_TAG=1
+          else
+            NEXT_TAG=$((LAST_TAG + 1))
+          fi
+          echo "next_tag=v$NEXT_TAG" >> $GITHUB_OUTPUT
+
       - name: Build Docker image
         run: |
-          echo "Building Docker image..."
-          docker buildx build --load -t "${{ secrets.DOCKER_USERNAME }}/kargo:latest" .
+          echo "Building Docker image with tags: latest and ${{ steps.tag.outputs.next_tag }}"
+          docker buildx build --load \
+            -t "${{ secrets.DOCKER_USERNAME }}/kargo:latest" \
+            -t "${{ secrets.DOCKER_USERNAME }}/kargo:${{ steps.tag.outputs.next_tag }}" \
+            .
 
-      - name: Push Docker image
+      - name: Push Docker image (latest)
+        run: docker push "${{ secrets.DOCKER_USERNAME }}/kargo:latest"
+
+      - name: Push Docker image (versioned)
+        run: docker push "${{ secrets.DOCKER_USERNAME }}/kargo:${{ steps.tag.outputs.next_tag }}"
+
+      - name: Create Git tag
         run: |
-          echo "Pushing Docker image..."
-          docker push "${{ secrets.DOCKER_USERNAME }}/kargo:latest"
-
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag "${{ steps.tag.outputs.next_tag }}"
+          git push origin "${{ steps.tag.outputs.next_tag }}"
