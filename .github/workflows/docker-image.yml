@@ -36,13 +36,18 @@ jobs:
           echo "NEXT_TAG=v$NEXT_TAG"
           echo "next_tag=v$NEXT_TAG" >> $GITHUB_OUTPUT
 
-      - name: Show build context
-        run: ls -l
+      - name: Show working directory and contents
+        run: |
+          echo "Working directory: $(pwd)"
+          echo "Contents:"
+          ls -la
 
       - name: Build Docker image with Buildx
         run: |
           echo "Building Docker image with tag: ${{ steps.get-tag.outputs.next_tag }}"
-          docker buildx build --load -t ${{ secrets.DOCKER_USERNAME }}/python:${{ steps.get-tag.outputs.next_tag }} .
+          docker buildx build --load \
+            -t ${{ secrets.DOCKER_USERNAME }}/python:${{ steps.get-tag.outputs.next_tag }} \
+            $GITHUB_WORKSPACE
 
       - name: Push Docker image
         run: |
