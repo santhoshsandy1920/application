@@ -37,7 +37,9 @@ jobs:
         ls -l .
 
     - name: Build Docker image
-      run: echo "Building Docker image with tag: ${{ env.NEXT_TAG }}" && DOCKER_BUILDKIT=0 docker build -t ${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }} .
+      run: |
+        echo "Building Docker image with tag: ${{ env.NEXT_TAG }}"
+        DOCKER_BUILDKIT=0 docker build -t ${{ secrets.DOCKER_USERNAME }}/python:${{ env.NEXT_TAG }} .
 
     - name: Push Docker image
       run: |
