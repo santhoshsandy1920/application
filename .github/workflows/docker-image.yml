@@ -33,7 +33,6 @@ jobs:
           else
             NEXT_TAG=$((LAST_TAG + 1))
           fi
-          echo "NEXT_TAG=v$NEXT_TAG"
           echo "next_tag=v$NEXT_TAG" >> $GITHUB_OUTPUT
 
       - name: Show working directory and contents
@@ -47,7 +46,7 @@ jobs:
           echo "Building Docker image with tag: ${{ steps.get-tag.outputs.next_tag }}"
           docker buildx build --load \
             -t ${{ secrets.DOCKER_USERNAME }}/python:${{ steps.get-tag.outputs.next_tag }} \
-            $GITHUB_WORKSPACE
+            .
 
       - name: Push Docker image
         run: |
