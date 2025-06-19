@@ -11,12 +11,14 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.next_tag }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Needed to access all git tags
+          fetch-depth: 0
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -46,11 +48,10 @@ jobs:
             -t "${{ secrets.DOCKER_USERNAME }}/kargo:${{ steps.tag.outputs.next_tag }}" \
             .
 
-      - name: Push Docker image (latest)
-        run: docker push "${{ secrets.DOCKER_USERNAME }}/kargo:latest"
-
-      - name: Push Docker image (versioned)
-        run: docker push "${{ secrets.DOCKER_USERNAME }}/kargo:${{ steps.tag.outputs.next_tag }}"
+      - name: Push Docker images
+        run: |
+          docker push "${{ secrets.DOCKER_USERNAME }}/kargo:latest"
+          docker push "${{ secrets.DOCKER_USERNAME }}/kargo:${{ steps.tag.outputs.next_tag }}"
 
       - name: Create Git tag
         run: |
@@ -58,4 +59,29 @@ jobs:
           git config user.email "actions@github.com"
           git tag "${{ steps.tag.outputs.next_tag }}"
           git push origin "${{ steps.tag.outputs.next_tag }}"
-#
+
+  update-deployment:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout GitOps repository
+        uses: actions/checkout@v3
+        with:
+          repository: santhoshsandy1920/application-gitops
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          path: gitops
+
+      - name: Update deployment.yaml with new image tag
+        run: |
+          cd gitops/environments/dev
+          sed -i "s|image: .*|image: docker.io/${{ secrets.DOCKER_USERNAME }}/kargo:${{ needs.build-and-push.outputs.tag }}|" deployment.yaml
+
+      - name: Commit and push changes
+        run: |
+          cd gitops
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Update dev image to kargo:${{ needs.build-and-push.outputs.tag }}"
+          git push
