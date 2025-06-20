@@ -60,28 +60,28 @@ jobs:
           git tag "${{ steps.tag.outputs.next_tag }}"
           git push origin "${{ steps.tag.outputs.next_tag }}"
 
-  update-deployment:
-    needs: build-and-push
-    runs-on: ubuntu-latest
+  # update-deployment:
+  #   needs: build-and-push
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout GitOps repository
-        uses: actions/checkout@v3
-        with:
-          repository: santhoshsandy1920/application-gitops
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          path: gitops
+  #   steps:
+  #     - name: Checkout GitOps repository
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: santhoshsandy1920/application-gitops
+  #         token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+  #         path: gitops
 
-      - name: Update deployment.yaml with new image tag
-        run: |
-          cd gitops/environments/dev
-          sed -i "s|image: .*|image: docker.io/${{ secrets.DOCKER_USERNAME }}/kargo:${{ needs.build-and-push.outputs.tag }}|" deployment.yaml
+  #     - name: Update deployment.yaml with new image tag
+  #       run: |
+  #         cd gitops/environments/dev
+  #         sed -i "s|image: .*|image: docker.io/${{ secrets.DOCKER_USERNAME }}/kargo:${{ needs.build-and-push.outputs.tag }}|" deployment.yaml
 
-      - name: Commit and push changes
-        run: |
-          cd gitops
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add .
-          git commit -m "Update dev image to kargo:${{ needs.build-and-push.outputs.tag }}"
-          git push
+  #     - name: Commit and push changes
+  #       run: |
+  #         cd gitops
+  #         git config user.name "GitHub Actions"
+  #         git config user.email "actions@github.com"
+  #         git add .
+  #         git commit -m "Update dev image to kargo:${{ needs.build-and-push.outputs.tag }}"
+  #         git push
