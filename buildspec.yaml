@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    S3_ARTIFACT_BUCKET: "YOUR_ARTIFACT_BUCKET"   # replace with your bucket
+    S3_ARTIFACT_BUCKET: "santhosh-artifact"   # replace with your bucket
 phases:
   install:
     runtime-versions:
