@@ -1,8 +1,5 @@
 version: 0.2
 
-env:
-  variables:
-    S3_ARTIFACT_BUCKET: "santhosh-artifact"   # replace with your bucket
 phases:
   install:
     runtime-versions:
@@ -18,11 +15,8 @@ phases:
       - cd output
       - zip -r ../app.zip .
       - cd ..
-  post_build:
-    commands:
-      - echo "Uploading to S3"
-      - export VERSION="$CODEBUILD_RESOLVED_SOURCE_VERSION"
-      - aws s3 cp app.zip s3://$S3_ARTIFACT_BUCKET/$VERSION/app.zip
+
 artifacts:
   files:
     - app.zip
+  discard-paths: yes
