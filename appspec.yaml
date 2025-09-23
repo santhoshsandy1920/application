@@ -1,23 +1,18 @@
 version: 0.0
 os: linux
 files:
-  - source: /
-    destination: /home/ec2-user/flask-app
-
+  - source: index.html
+    destination: /home/ec2-user/rapyder-app
 hooks:
-  ApplicationStop:
-    - location: scripts/stop_server.sh
-      timeout: 60
-      runas: ec2-user
   BeforeInstall:
     - location: scripts/install_dependencies.sh
       timeout: 300
       runas: ec2-user
   AfterInstall:
     - location: scripts/start_server.sh
-      timeout: 60
+      timeout: 300
       runas: ec2-user
-  ValidateService:
+  ApplicationStart:
     - location: scripts/validate.sh
-      timeout: 30
+      timeout: 300
       runas: ec2-user
