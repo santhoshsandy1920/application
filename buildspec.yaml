@@ -13,8 +13,4 @@ phases:
 
 artifacts:
   files:
-    - appspec.yaml
-    - scripts/*
-    - requirements.txt
-    - app.py
-    - flask-app/**/*
+    - '**/*'   # Include everything to preserve folder structure
