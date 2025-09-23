@@ -7,8 +7,6 @@ phases:
     commands:
       - echo "Installing dependencies for build..."
       - pip install -r requirements.txt
-
-phases:
   build:
     commands:
       - echo "Build phase completed"
