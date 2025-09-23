@@ -8,4 +8,4 @@ echo "Stopping any process on port 80..."
 sudo fuser -k 80/tcp || true
 
 echo "Starting Python HTTP server on port 80..."
-nohup python3 -m http.server 80 > $APP_DIR/server.log 2>&1 &
+nohup sudo python3 -m http.server 80 > $APP_DIR/server.log 2>&1 &
