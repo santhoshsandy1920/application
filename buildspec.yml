@@ -1,0 +1,21 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing dependencies if any..."
+  build:
+    commands:
+      - echo "Build phase - preparing artifact"
+      - mkdir -p build/scripts
+      - cp index.html build/
+      - cp appspec.yml build/
+      - cp scripts/*.sh build/scripts/
+      - echo "Build artifact ready"
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: build
+  discard-paths: no
+  name: rapyder-html.zip
